@@ -534,7 +534,7 @@
 
     return [
       el("section", { class: "setup" }, [
-        field("Her name (optional)",
+        field("Name (optional)",
           el("input", { type: "text", value: plan.to, maxlength: "40", placeholder: "Go", "data-fk": "f-to", oninput: (e) => { plan.to = e.target.value; saveDraft(); } })),
         field("Headline",
           el("input", { type: "text", value: plan.headline, maxlength: "80", placeholder: DEFAULT_HEADLINE, "data-fk": "f-headline", oninput: (e) => { plan.headline = e.target.value; saveDraft(); } })),
