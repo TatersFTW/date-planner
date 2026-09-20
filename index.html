@@ -522,8 +522,8 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
         onclick: function () { mode = m; render(); window.scrollTo(0, 0); } });
     }
     return el("div", { class: "top" }, [
-      el("div", { class: "seg", role: "group", "aria-label": "Page view" }, [seg("edit", "Edit"), seg("view", "Her view")]),
-      el("span", { class: "hint", text: mode === "edit" ? "Build the plan, then copy her link." : "This is what she sees." })
+      el("div", { class: "seg", role: "group", "aria-label": "Page view" }, [seg("edit", "Create Date"), seg("view", "View Dates")])
+
     ]);
   }
 
