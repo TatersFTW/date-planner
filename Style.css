@@ -1,0 +1,371 @@
+/* ==========================================================================
+   Date planner styles
+   1. Tokens  2. Base  3. Layout  4. Header  5. Tickets  6. Chips and pills
+   7. Forms  8. Buttons  9. Reply panel  10. Lock screen  11. Toast
+   ========================================================================== */
+
+/* 1. Tokens ---------------------------------------------------------------- */
+:root {
+  --bg: #F3F0F8;
+  --card: #FFFFFF;
+  --field: #FBFAFD;
+  --ink: #241A35;
+  --muted: #655A78;
+  --line: #D8CFE5;
+
+  --accent: #C2185B;
+  --on-accent: #FFFFFF;
+
+  --yes: #127A5A;
+  --maybe: #8A5A00;
+  --no: #5F566F;
+  --on-answer: #FFFFFF;
+  --danger: #B3261E;
+
+  color-scheme: light dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #150F1E;
+    --card: #211929;
+    --field: #1A1323;
+    --ink: #F1EBF8;
+    --muted: #B0A3C4;
+    --line: #3A2E4B;
+    --accent: #FF6B9A;
+    --on-accent: #2A0716;
+    --yes: #4BD8A6;
+    --maybe: #F2C14E;
+    --no: #B0A3C4;
+    --on-answer: #141019;
+    --danger: #FF8A80;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #150F1E;
+  --card: #211929;
+  --field: #1A1323;
+  --ink: #F1EBF8;
+  --muted: #B0A3C4;
+  --line: #3A2E4B;
+  --accent: #FF6B9A;
+  --on-accent: #2A0716;
+  --yes: #4BD8A6;
+  --maybe: #F2C14E;
+  --no: #B0A3C4;
+  --on-answer: #141019;
+  --danger: #FF8A80;
+}
+
+/* 2. Base ------------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.5 "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+h1, h2, .what, .stub {
+  font-family: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+}
+
+/* 3. Layout ---------------------------------------------------------------- */
+.wrap { max-width: 560px; margin: 0 auto; padding: 20px 16px 64px; }
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  margin-bottom: 22px;
+}
+
+.hint { font-size: 0.9rem; color: var(--muted); }
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.segmented button {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+.list { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+
+.empty-card {
+  padding: 26px 20px;
+  border: 2px dashed var(--line);
+  border-radius: 18px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* 4. Header ---------------------------------------------------------------- */
+.hero { margin-bottom: 26px; }
+.hi { margin: 0 0 4px; color: var(--muted); font-size: 1.05rem; }
+
+h1 {
+  margin: 0 0 12px;
+  font-weight: 800;
+  font-size: clamp(2.1rem, 10vw, 3rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+h2 { margin: 0 0 6px; font-weight: 700; font-size: 1.45rem; line-height: 1.15; letter-spacing: -0.015em; }
+
+.note { margin: 0; max-width: 46ch; font-size: 1.08rem; white-space: pre-line; overflow-wrap: anywhere; }
+.help { margin: 0 0 16px; color: var(--muted); }
+
+/* 5. Tickets --------------------------------------------------------------- */
+.ticket {
+  position: relative;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+
+.ticket.locked { border: 2px solid var(--accent); }
+
+.stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 6px;
+  text-align: center;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-right: 2px dashed var(--bg);
+}
+
+/* the two notches that make the stub look torn off */
+.stub::before, .stub::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.stub::before { top: -9px; }
+.stub::after { bottom: -9px; }
+
+.stub .dow, .stub .mon { font-size: 0.95rem; font-weight: 600; line-height: 1.2; }
+.stub .day { margin: 2px 0; font-size: 2.9rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+
+.ticket-body { min-width: 0; padding: 14px 14px 14px 18px; }
+.what { margin: 0; font-weight: 700; font-size: 1.2rem; line-height: 1.2; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.meta { margin: 4px 0 0; color: var(--muted); font-size: 0.96rem; overflow-wrap: anywhere; }
+
+.ticket.big { grid-template-columns: 112px minmax(0, 1fr); }
+.ticket.big .stub .day { font-size: 3.7rem; }
+.ticket.big .what { font-size: 1.55rem; }
+.ticket.big .meta { font-size: 1.05rem; }
+
+.answers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+
+.answer {
+  min-height: 42px;
+  padding: 0 4px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.answer:hover { border-color: var(--muted); }
+.answer.on { color: var(--on-answer); }
+.answer.on::before { content: "\2713\00a0"; }
+.answer.on.answer-in { background: var(--yes); border-color: var(--yes); }
+.answer.on.answer-maybe { background: var(--maybe); border-color: var(--maybe); }
+.answer.on.answer-no { background: var(--no); border-color: var(--no); }
+
+/* 6. Chips and pills ------------------------------------------------------- */
+.kind {
+  display: inline-block;
+  margin: 0 0 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+
+.chip {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip:hover { border-color: var(--muted); }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.chips.small { margin: 0; }
+.chips.small .chip { min-height: 36px; padding: 0 12px; font-size: 0.92rem; }
+
+/* 7. Forms ----------------------------------------------------------------- */
+.field { display: grid; gap: 4px; margin: 0 0 14px; }
+.field > span { font-size: 0.88rem; font-weight: 600; color: var(--muted); }
+.field-hint { margin: 0; font-size: 0.86rem; color: var(--muted); }
+
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 16px; /* 16px stops iOS from zooming in on focus */
+}
+
+textarea { min-height: 78px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
+
+.setup { margin-bottom: 26px; }
+
+.ticket.edit .ticket-body { display: grid; gap: 10px; }
+.ticket.edit .field { margin: 0; }
+.row-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.ticket-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.locked-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+}
+.locked-note p { margin: 0; overflow-wrap: anywhere; }
+
+/* 8. Buttons --------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn.primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.small { min-height: 40px; padding: 0 16px; font-size: 0.92rem; }
+.btn.quiet { border-color: var(--line); color: var(--muted); }
+.btn.add { width: 100%; margin-top: 16px; border-style: dashed; border-color: var(--muted); color: var(--muted); }
+.btn.add:hover { border-color: var(--ink); color: var(--ink); }
+.btn.share { width: 100%; margin-top: 12px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.cta { margin: 22px 0 0; }
+.draft-note { margin: 10px 0 0; text-align: center; font-size: 0.9rem; color: var(--muted); }
+
+/* 9. Reply panel ----------------------------------------------------------- */
+.reply { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); }
+
+.preview {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  background: var(--field);
+  font-size: 0.96rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.preview.empty { color: var(--muted); }
+
+/* 10. Lock screen ---------------------------------------------------------- */
+.lock-form { display: grid; gap: 14px; max-width: 360px; }
+.lock-form .field { margin: 0; }
+.check { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.95rem; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.error { margin: 0; min-height: 1.5em; color: var(--danger); font-weight: 600; }
+
+/* 11. Toast ---------------------------------------------------------------- */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 10;
+  max-width: 90vw;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 600;
+  text-align: center;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+#toast.show { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
