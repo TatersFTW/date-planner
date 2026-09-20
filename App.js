@@ -377,7 +377,6 @@
     });
     return el("div", { class: "top" }, [
       el("div", { class: "segmented", role: "group", "aria-label": "Page view" }, [tab("edit", "Create Date"), tab("view", "View Dates")]),
-      el("span", { class: "hint", text: mode === "edit" ? "Build the plan, then copy her link." : "This is what she sees." })
     ]);
   }
 
