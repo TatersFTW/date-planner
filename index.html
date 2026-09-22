@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <title>Date planner</title>
+  <title>Our dates</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%8C%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap">
   <link rel="stylesheet" href="style.css">
@@ -12,6 +12,17 @@
 <body>
   <div id="root"></div>
   <noscript>This page needs JavaScript turned on.</noscript>
-  <script src="app.js" defer></script>
+
+  <!-- Order matters: each file uses the ones above it. -->
+  <script src="js/util.js" defer></script>
+  <script src="js/crypto.js" defer></script>
+  <script src="js/model.js" defer></script>
+  <script src="js/state.js" defer></script>
+  <script src="js/sync.js" defer></script>
+  <script src="js/parts.js" defer></script>
+  <script src="js/pages-dates.js" defer></script>
+  <script src="js/pages-history.js" defer></script>
+  <script src="js/pages-sync.js" defer></script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>
