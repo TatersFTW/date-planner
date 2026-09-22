@@ -13,12 +13,20 @@
   <div id="root"></div>
   <noscript>This page needs JavaScript turned on.</noscript>
 
+  <!-- Cloud sync is optional: js/firebase-config.js is empty by default, so these
+       three tags load harmlessly and the app falls back to manual links. See
+       README.md, "Turning on cloud sync", to enable it. -->
+  <script src="js/firebase-config.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
+
   <!-- Order matters: each file uses the ones above it. -->
   <script src="js/util.js" defer></script>
   <script src="js/crypto.js" defer></script>
   <script src="js/model.js" defer></script>
   <script src="js/state.js" defer></script>
   <script src="js/sync.js" defer></script>
+  <script src="js/cloud.js" defer></script>
   <script src="js/parts.js" defer></script>
   <script src="js/pages-dates.js" defer></script>
   <script src="js/pages-history.js" defer></script>

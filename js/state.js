@@ -69,6 +69,7 @@
     S.space.entries[entry.id] = entry;
     if (!S.space.pending.includes(entry.id)) S.space.pending.push(entry.id);
     S.save();
+    if (DP.cloud) DP.cloud.schedulePush(); // no-op until cloud sync is configured
     return entry;
   }
 

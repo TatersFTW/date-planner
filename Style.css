@@ -409,6 +409,15 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 .card.form > .btn-row { margin-top: 4px; }
 .card.form > .btn.danger { margin-top: 16px; }
 
+.card.cloud { display: flex; flex-direction: column; gap: 4px; }
+.card.cloud h2 { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; }
+.card.cloud p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.card.cloud .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+.card.cloud-connected { border-color: var(--yes); }
+.card.cloud-connected .dot { background: var(--yes); }
+.card.cloud-connecting .dot { background: var(--maybe); }
+.card.cloud-offline .dot, .card.cloud-error .dot { background: var(--danger); }
+
 /* 11. Lock screen ---------------------------------------------------------- */
 .lock-form { display: grid; gap: 14px; max-width: 360px; }
 .lock-form .field { margin: 0; }

@@ -29,8 +29,28 @@
     history: defaultHistory()
   };
 
+  /* ---- cloud sync ---- */
+  /** Idempotent: cheap to call on every render, only (re)starts the listener when the space or person changes. */
+  function ensureCloud() {
+    if (!DP.cloud) return;
+    if (S.space) {
+      DP.cloud.start(S.space, {
+        onMerge: (result) => {
+          render();
+          if (result.added || result.updated) {
+            U.toast(`Synced with ${S.nameOf(S.partnerId())}: ${U.plural(result.added, "new date")}, ${result.updated} updated.`);
+          }
+        },
+        onStatus: () => { if (ui.route === "sync") render(); }
+      });
+    } else {
+      DP.cloud.stop();
+    }
+  }
+
   /* ---- drawing ---- */
   function render() {
+    ensureCloud();
     let focusKey = ui.pendingFocus || document.activeElement?.dataset?.fk;
     ui.pendingFocus = null;
 

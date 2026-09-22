@@ -12,6 +12,23 @@
 
   const MIN_PASSWORD = 6;
 
+  const CLOUD_STATUS = {
+    unconfigured: { label: "Not set up", detail: "Cloud sync isn't configured for this site. You're syncing with links and backups below, which always works. See README.md, \u201cTurning on cloud sync\u201d, to add it once for both of you." },
+    connecting: { label: "Connecting\u2026", detail: "Looking for your partner's updates." },
+    connected: { label: "Connected", detail: "Changes you make sync automatically. Links and backups below still work as a fallback." },
+    offline: { label: "Offline", detail: "No connection right now. Your changes are saved and will sync as soon as you're back online." },
+    error: { label: "Couldn't connect", detail: "Something's wrong with the cloud setup. Use a link or backup below for now." }
+  };
+
+  function cloudCard() {
+    if (!DP.cloud) return null;
+    const s = CLOUD_STATUS[DP.cloud.status] || CLOUD_STATUS.unconfigured;
+    return el("section", { class: `card cloud cloud-${DP.cloud.status}` }, [
+      el("h2", {}, [el("span", { class: "dot" }), `Automatic sync: ${s.label}`]),
+      el("p", { text: s.detail })
+    ]);
+  }
+
   /* ---- Sync ---- */
   DP.pages.sync = function (ctx) {
     const space = S.space;
@@ -38,11 +55,13 @@
     });
 
     return [
-      P.hero("Sync and backup", `Your dates live on your devices. Swap private links with ${partner} to keep both copies the same.`),
+      P.hero("Sync and backup", `Your dates live on your devices. Cloud sync keeps them matched automatically when it's set up; links and backups are the manual fallback.`),
+
+      cloudCard(),
 
       el("section", { class: "card" }, [
-        el("h2", { text: `Send updates to ${partner}` }),
-        el("p", { text: pending ? `${U.plural(pending, "change")} not sent yet.` : "Everything you changed has been sent." }),
+        el("h2", { text: `Send updates to ${partner} manually` }),
+        el("p", { text: DP.cloud && DP.cloud.status === "connected" ? "Cloud sync is handling this, so you shouldn't need these." : pending ? `${U.plural(pending, "change")} not sent yet.` : "Everything you changed has been sent." }),
         el("p", { class: "meta", text: `Last sent: ${when(space.lastSentAt)}. Last received: ${when(space.lastReceivedAt)}.` }),
         el("div", { class: "btn-row" }, [
           P.button("Copy update link", "btn primary", () => ctx.copyLink("delta"), "copy-delta"),
