@@ -21,7 +21,9 @@
 
   function buildPayload(kind) {
     const space = S.space;
-    const since = kind === "full" ? -1 : U.now() - WINDOW_DAYS * 86400000;
+    // "full" (a partner invite) and "device" (adding your own second device) both need everything;
+    // only "delta" (an everyday manual update) is trimmed to the recent window.
+    const since = kind === "delta" ? U.now() - WINDOW_DAYS * 86400000 : -1;
     return {
       v: M.SCHEMA,
       kind,
@@ -54,8 +56,9 @@
     if (!raw || typeof raw.space !== "string" || !M.MEMBERS.includes(raw.from) || !Array.isArray(raw.entries)) {
       throw new Error("not a date planner payload");
     }
+    const KNOWN_KINDS = ["full", "delta", "device"];
     return {
-      kind: raw.kind === "full" ? "full" : "delta",
+      kind: KNOWN_KINDS.includes(raw.kind) ? raw.kind : "delta",
       space: raw.space,
       from: raw.from,
       names: { a: String(raw.names?.a || ""), b: String(raw.names?.b || "") },

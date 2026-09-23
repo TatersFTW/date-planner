@@ -15,7 +15,15 @@
   const U = DP.util;
   const M = DP.model;
   const KEY = "dp2-space";
+  const DEVICE_KEY = "dp2-device";
   const S = { space: null };
+
+  /** A random id for this browser, so several of your own devices can sync without colliding. Stays the same across resets. */
+  S.deviceId = () => {
+    let id = U.store.get(DEVICE_KEY, null);
+    if (!id) { id = U.uid() + U.uid(); U.store.set(DEVICE_KEY, id); }
+    return id;
+  };
 
   const str = (value, max = 40) => (typeof value === "string" ? value.trim().slice(0, max) : "");
 
@@ -127,16 +135,21 @@
     }
     const theirName = str(payload.names[payload.from]);
     if (theirName) S.space.names[payload.from] = theirName;
-    S.space.partnerSeen = true;
+    if (payload.from !== S.space.me) S.space.partnerSeen = true;
     S.space.lastReceivedAt = U.now();
     S.save();
     return { added, updated };
   };
 
-  /** Sets up this device from a full copy your partner sent. */
-  S.join = (payload, password) => {
-    S.create({ id: payload.space, me: M.other(payload.from), names: payload.names, password, entries: payload.entries });
-    S.space.partnerSeen = true;
+  /**
+   * Sets up this device from a full copy sent by a link.
+   * asSelf: true for "add this to another device of mine" links (same person, e.g. your phone).
+   * asSelf: false (default) for an invite link from your partner (you become the other person).
+   */
+  S.join = (payload, password, { asSelf = false } = {}) => {
+    const me = asSelf ? payload.from : M.other(payload.from);
+    S.create({ id: payload.space, me, names: payload.names, password, entries: payload.entries });
+    if (!asSelf) S.space.partnerSeen = true; // only a real partner joining should hide the invite card
     S.space.lastReceivedAt = U.now();
     S.save();
   };

@@ -13,14 +13,17 @@
    Firebase only ever stores encrypted text that it can't read.
    ========================================================================== */
 
+window.DP_FIREBASE_CONFIG = null;
+
+/* Paste your project's config here instead, then redeploy. It looks like:
 
 window.DP_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBUs33uaf-y-Qv6DDfEmqM18ByN3LzSCbs",
-  authDomain: "date-planner-56c5c.firebaseapp.com",
-  projectId: "date-planner-56c5c",
-  storageBucket: "date-planner-56c5c.firebasestorage.app",
-  messagingSenderId: "904589398503",
-  appId: "1:904589398503:web:c2b5c36f80971c96c92d42",
-  measurementId: "G-QWSY6JL7V1"
+  apiKey: "AIza...",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "...",
+  appId: "..."
 };
 
+*/

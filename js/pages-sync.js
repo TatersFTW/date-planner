@@ -60,6 +60,12 @@
       cloudCard(),
 
       el("section", { class: "card" }, [
+        el("h2", { text: "Add this to another device of yours" }),
+        el("p", { text: `Use this for your own phone, tablet or other computer \u2014 not for ${partner}. The new device becomes another copy of you: same name, same answers, and it stays in sync the same way this one does.` }),
+        P.button("Copy link for your other device", "btn primary", () => ctx.copyDeviceLink(), "copy-device")
+      ]),
+
+      el("section", { class: "card" }, [
         el("h2", { text: `Send updates to ${partner} manually` }),
         el("p", { text: DP.cloud && DP.cloud.status === "connected" ? "Cloud sync is handling this, so you shouldn't need these." : pending ? `${U.plural(pending, "change")} not sent yet.` : "Everything you changed has been sent." }),
         el("p", { class: "meta", text: `Last sent: ${when(space.lastSentAt)}. Last received: ${when(space.lastReceivedAt)}.` }),

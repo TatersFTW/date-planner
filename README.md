@@ -57,20 +57,25 @@ of use comfortably with no card required.
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
-       match /datePlannerSpaces/{spaceId}/members/{member} {
+       match /datePlannerSpaces/{spaceId}/devices/{deviceId} {
          allow read, write: if true;
        }
      }
    }
    ```
-   **What this means:** anyone who had your invite link (specifically, the random space ID
-   inside it) could write to that one document. They still couldn't read your plans, because
-   only encrypted text is ever stored there — your password never leaves your browsers, and
-   Firebase never sees it. This is the same trust level as the plain link/backup system this
-   app already has; cloud sync just moves the encrypted text automatically instead of you
-   copying it. If you want stricter rules later, add Firebase Authentication and change this
-   rule to check `request.auth != null`, which `js/cloud.js` doesn't currently use but could
-   be extended to.
+   **What this means:** anyone who had a link into your space (specifically, the random space
+   ID inside it) could write to documents under that space. They still couldn't read your
+   plans, because only encrypted text is ever stored there — your password never leaves your
+   browsers, and Firebase never sees it. This is the same trust level as the plain link/backup
+   system this app already has; cloud sync just moves the encrypted text automatically instead
+   of you copying it. If you want stricter rules later, add Firebase Authentication and change
+   this rule to check `request.auth != null`, which `js/cloud.js` doesn't currently use but
+   could be extended to.
+
+   *If you set up cloud sync before this section had a "devices" collection, update your
+   published rule to the one above (Firestore → Rules → replace → Publish). The old rule
+   only covered a "members" path, and it needs to cover "devices" instead for the steps below
+   to work.*
 4. **Get your config.** Back on the project's main page (click the gear icon, **Project
    settings**), scroll to **Your apps**, click the **</>** (web) icon, register an app with any
    nickname, and skip Firebase Hosting. Copy the `firebaseConfig` object it shows you.
@@ -93,16 +98,27 @@ of use comfortably with no card required.
 The free tier's limits are generous for two people planning dates (tens of thousands of
 reads and writes a day); you won't come close.
 
+## Using more than one device
+
+Each device — not each person — keeps its own copy. If you want your dates on your phone as
+well as your PC, don't send yourself the invite link meant for your partner: that would set the
+phone up *as your partner* instead of as you.
+
+Instead, on any device that already has your dates, go to **Sync → Add this to another device
+of yours**, and open that link on the new device. It becomes another copy of you — same name,
+same answers — and from then on, all of your devices and your partner's stay in sync with each
+other automatically (when cloud sync is set up) or by swapping links (when it isn't).
+
 ## How syncing works
 
-- **Cloud sync**, once configured: each of you keeps one small document in Firestore holding
-  your latest full, encrypted plan. Your device listens to your partner's document and merges
-  it the moment it changes.
+- **Cloud sync**, once configured: every device — yours and your partner's — keeps one small
+  document in Firestore holding its latest full, encrypted plan. Each device listens to every
+  other device's document and merges the moment one changes.
 - **Manual fallback**, always available from the Sync page: an update link (recent changes) or
   full link (everything), and a downloadable encrypted backup.
-- **Merging never loses anything**, in either case: each of you writes your own answers and
-  memories, edits to a date use "last edit wins", and deletes travel as markers. Applying the
-  same data twice, or in any order, gives the same result.
+- **Merging never loses anything**, in either case: each person's answers and memories are kept
+  separately by person (not by device), edits to a date use "last edit wins", and deletes travel
+  as markers. Applying the same data twice, from any device, in any order, gives the same result.
 
 ## Growing this later
 
@@ -110,4 +126,7 @@ reads and writes a day); you won't come close.
   `migrate()` in `js/state.js`. Old saved data, old backups, and old cloud documents keep working.
 - **A different cloud backend**: only `start()`, `stop()` and `pushNow()` in `js/cloud.js` know
   about Firestore. Point them at a different database and nothing else in the app changes.
+- **More people, not just two**: the merge model (`js/model.js`) is keyed by "a" and "b" today.
+  Moving to a list of people is the main change; the per-device Firestore layout already
+  supports any number of devices per person.
 - **New categories**: add to `KINDS` in `js/model.js`.

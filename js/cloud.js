@@ -3,10 +3,14 @@
 
    Same encryption, same merge rules, same payload shape as a manual link.
    The only difference is where the encrypted text travels: instead of you
-   copying a link, each of you keeps one Firestore document holding your
-   latest full, encrypted plan. Your device listens to your partner's
-   document in real time and merges it the moment it changes, exactly like
-   opening a link they sent you.
+   copying a link, every device (yours and your partner's) keeps one
+   Firestore document holding its latest full, encrypted plan. Each device
+   listens to every other device's document in real time and merges the
+   moment one changes, exactly like opening a link sent to you.
+
+   Documents live at datePlannerSpaces/{spaceId}/devices/{deviceId}, one per
+   device rather than one per person, so your phone and your PC can each
+   have their own without overwriting each other.
 
    If js/firebase-config.js has no config, or the Firebase scripts didn't
    load, or the device is offline, none of this runs and the app falls back
@@ -25,7 +29,7 @@
   let db = null;
   let unsubscribe = null;
   let pushTimer = null;
-  let current = null; // { spaceId, me }
+  let current = null; // { spaceId, deviceId }
   let onMerge = null;
   let onStatus = null;
   let status = "unconfigured"; // unconfigured | connecting | connected | offline | error
@@ -54,15 +58,13 @@
     }
   }
 
-  /** One document per person: datePlannerSpaces/{spaceId}/members/{a-or-b} */
-  const memberDoc = (spaceId, member) => db.collection("datePlannerSpaces").doc(spaceId).collection("members").doc(member);
+  const devices = (spaceId) => db.collection("datePlannerSpaces").doc(spaceId).collection("devices");
 
   async function pushNow() {
     if (!db || !current || !DP.state.space) return;
     try {
       const cipher = await DP.sync.createCipher("full");
-      await memberDoc(current.spaceId, current.me).set({ payload: cipher, updatedAt: Date.now() });
-      DP.state.markSent();
+      await devices(current.spaceId).doc(current.deviceId).set({ payload: cipher, updatedAt: Date.now() });
       setStatus("connected");
     } catch {
       setStatus("error");
@@ -83,33 +85,35 @@
     setStatus(configured() ? "connecting" : "unconfigured");
   }
 
-  /** Begins syncing this space. Safe to call again for the same space; only a change of space or person restarts the listener. */
+  /** Begins syncing this space. Safe to call again for the same device; only a change of space restarts the listener. */
   function start(space, callbacks = {}) {
     if (callbacks.onMerge) onMerge = callbacks.onMerge;
     if (callbacks.onStatus) onStatus = callbacks.onStatus;
     if (!db && !init()) return;
-    if (current && current.spaceId === space.id && current.me === space.me) return;
+
+    const deviceId = DP.state.deviceId();
+    if (current && current.spaceId === space.id && current.deviceId === deviceId) return;
 
     stop();
-    current = { spaceId: space.id, me: space.me };
+    current = { spaceId: space.id, deviceId };
     setStatus("connecting");
-    pushNow(); // make sure our own document exists and is current
+    pushNow(); // make sure this device's own document exists and is current
 
-    const partner = DP.model.other(space.me);
-    unsubscribe = memberDoc(space.id, partner).onSnapshot(
-      async (snap) => {
+    unsubscribe = devices(space.id).onSnapshot(
+      (snapshot) => {
         setStatus("connected");
-        const data = snap.data();
-        if (!data || !data.payload) return; // partner hasn't synced yet
-        let payload;
-        try {
-          payload = await DP.sync.open(data.payload, DP.state.space.password);
-        } catch {
-          return; // wrong password or a document from a different space; ignore
-        }
-        if (payload.space !== DP.state.space.id || payload.from !== partner) return;
-        const result = DP.state.mergeIncoming(payload);
-        if (onMerge) onMerge(result, payload);
+        snapshot.forEach((doc) => {
+          if (doc.id === deviceId) return; // never merge our own document
+          const data = doc.data();
+          if (!data || !data.payload) return;
+          DP.sync.open(data.payload, DP.state.space.password)
+            .then((payload) => {
+              if (payload.space !== DP.state.space.id) return;
+              const result = DP.state.mergeIncoming(payload);
+              if (onMerge) onMerge(result, payload);
+            })
+            .catch(() => {}); // wrong password, or a document from a different space; ignore
+        });
       },
       () => setStatus("offline")
     );

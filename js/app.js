@@ -35,10 +35,11 @@
     if (!DP.cloud) return;
     if (S.space) {
       DP.cloud.start(S.space, {
-        onMerge: (result) => {
+        onMerge: (result, payload) => {
           render();
           if (result.added || result.updated) {
-            U.toast(`Synced with ${S.nameOf(S.partnerId())}: ${U.plural(result.added, "new date")}, ${result.updated} updated.`);
+            const who = payload.from === S.space.me ? "your other device" : S.nameOf(S.partnerId());
+            U.toast(`Synced with ${who}: ${U.plural(result.added, "new date")}, ${result.updated} updated.`);
           }
         },
         onStatus: () => { if (ui.route === "sync") render(); }
@@ -129,9 +130,17 @@
       };
     }
 
-    if (payload.kind !== "full") return { ok: false, reason: "partial", who: payload.names[payload.from] };
-    S.join(payload, password.trim());
-    return { ok: true, message: `Welcome! Your shared dates from ${payload.names[payload.from]} are here.` };
+    if (payload.kind !== "full" && payload.kind !== "device") {
+      return { ok: false, reason: "partial", who: payload.names[payload.from] };
+    }
+    const asSelf = payload.kind === "device";
+    S.join(payload, password.trim(), { asSelf });
+    return {
+      ok: true,
+      message: asSelf
+        ? "Welcome back. Your dates are set up on this device too."
+        : `Welcome! Your shared dates from ${payload.names[payload.from]} are here.`
+    };
   }
 
   function leaveIncoming() {
@@ -176,6 +185,22 @@
     return handleIncoming(cipher);
   }
 
+  /** Like copyLink, but for setting up another device of your own (same identity, not your partner). */
+  async function copyDeviceLink() {
+    if (!DP.crypto.supported()) return U.toast("Encryption needs https. Open the live site, not a local file.");
+    try {
+      const url = await DP.sync.createLink("device");
+      try {
+        await U.copyText(url);
+        U.toast("Link copied. Open it on your other device and enter the same password.");
+      } catch {
+        window.prompt("Copy this link and open it on your other device:", url);
+      }
+    } catch {
+      U.toast("Couldn't create the link. Try again.");
+    }
+  }
+
   async function copyLink(kind) {
     if (!DP.crypto.supported()) return U.toast("Encryption needs https. Open the live site, not a local file.");
     const partner = S.nameOf(S.partnerId());
@@ -195,7 +220,7 @@
   }
 
   const ctx = {
-    ui, render, go, startNew, edit, copyLink, importText, tryIncoming, cancelIncoming,
+    ui, render, go, startNew, edit, copyLink, copyDeviceLink, importText, tryIncoming, cancelIncoming,
     resetHistoryFilters: () => Object.assign(ui.history, defaultHistory())
   };
 
